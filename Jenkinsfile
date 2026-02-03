@@ -62,7 +62,7 @@ pipeline {
         stage('commit version update'){
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'gitlab-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                    withCredentials([usernamePassword(credentialsId: 'GitHub-PAT', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                         //sh "git remote set-url origin https://${USER}:${PASS}@gitlab.com/twn-devops-bootcamp/latest/11-eks/java-maven-app.git"
                         sh "git remote set-url origin https://github.com/${USER}:${PASS}/java-maven-app-eks-deployment-ci-cd-multibranch-jenkins.git"
                         sh 'git add .'
