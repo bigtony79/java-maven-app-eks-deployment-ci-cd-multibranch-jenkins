@@ -73,6 +73,10 @@ pipeline {
             steps {
                 script {
                    echo 'deploying docker image...'
+                   withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                       sh 'aws eks update-kubeconfig --region us-east-1 --name eks-cluster-demo'
+                       
+                   }
                    //sh 'envsubst < kubernetes/deployment.yaml | kubectl apply -f -'
                    //sh 'envsubst < kubernetes/service.yaml | kubectl apply -f -'
                 }
