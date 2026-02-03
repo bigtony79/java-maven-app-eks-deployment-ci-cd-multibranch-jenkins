@@ -13,7 +13,9 @@ def buildImage() {
 }
 
 def deployApp() {
-    echo 'deploying the application...'
+    echo 'deploying the docker image in Kubernetes....'
+    //sh 'kubectl set image deployment/java-deploy java-container=tonyjacob79/java-app:java-mvn-1.2'
+    sh 'kubectl create deployment nginx-deployment --image=nginx:latest'
 }
 
 return this
