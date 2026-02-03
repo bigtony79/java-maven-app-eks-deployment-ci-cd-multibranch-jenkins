@@ -9,6 +9,7 @@ pipeline {
         //DOCKER_REPO_SERVER = '330673547330.dkr.ecr.eu-central-1.amazonaws.com'
         //DOCKER_REPO = "${DOCKER_REPO_SERVER}/java-maven-app"
         DOCKER_REPO = 'tonyjacob79/java-maven-app'
+        APP_NAME = 'java-maven-app'
     }
     stages {
         stage('increment version') {
@@ -33,6 +34,38 @@ pipeline {
             }
         }
 
+        
+        stage('build image') {
+            steps {
+                script {
+                    echo "building the docker image..."
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-pat', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                        sh "docker build -t ${DOCKER_REPO}:${IMAGE_NAME} ."
+                        //sh 'echo $PASS | docker login -u $USER --password-stdin ${DOCKER_REPO_SERVER}'
+                        sh 'echo $PASS | docker login -u $USER --password-stdin'
+                        sh "docker push ${DOCKER_REPO}:${IMAGE_NAME}"
+                    }
+                }
+            }
+        }
+        stage('deploy') {
+           
+            steps {
+                script {
+                   echo 'deploying docker image in kubernetes...'
+                   withCredentials([usernamePassword(credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')])
+                    {
+                       sh 'aws eks update-kubeconfig --region us-east-1 --name eks-cluster-demo'
+                       sh 'kubectl get nodes'
+                       sh 'envsubst < k8s/deployment.yaml | kubectl apply -f -'
+                       sh 'envsubst < k8s/service.yaml | kubectl apply -f -'
+                       
+                    }
+                   
+                }
+            }
+        }
+
         stage('commit version update'){
             steps {
                 script {
@@ -51,35 +84,7 @@ pipeline {
         }
 
 
-        stage('build image') {
-            steps {
-                script {
-                    echo "building the docker image..."
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-pat', passwordVariable: 'PASS', usernameVariable: 'USER')]){
-                        sh "docker build -t ${DOCKER_REPO}:${IMAGE_NAME} ."
-                        //sh 'echo $PASS | docker login -u $USER --password-stdin ${DOCKER_REPO_SERVER}'
-                        sh 'echo $PASS | docker login -u $USER --password-stdin'
-                        sh "docker push ${DOCKER_REPO}:${IMAGE_NAME}"
-                    }
-                }
-            }
-        }
-        stage('deploy') {
-           
-            steps {
-                script {
-                   echo 'deploying docker image...'
-                   withCredentials([usernamePassword(credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')])
- {
-                       sh 'aws eks update-kubeconfig --region us-east-1 --name eks-cluster-demo'
-                       sh 'kubectl get nodes'
-                       
-                   }
-                   //sh 'envsubst < kubernetes/deployment.yaml | kubectl apply -f -'
-                   //sh 'envsubst < kubernetes/service.yaml | kubectl apply -f -'
-                }
-            }
-        }
+
         
     }
 }
