@@ -64,10 +64,13 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'GitHub-PAT', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                         //sh "git remote set-url origin https://${USER}:${PASS}@gitlab.com/twn-devops-bootcamp/latest/11-eks/java-maven-app.git"
+                         // Set Git identity so commit works
+                        sh 'git config user.email "jenkins@ci.local"'
+                        sh 'git config user.name "Jenkins CI"'                       
                         sh "git remote set-url origin https://github.com/${USER}:${PASS}/java-maven-app-eks-deployment-ci-cd-multibranch-jenkins.git"
                         sh 'git add .'
                         sh 'git commit -m "ci: version bump"'
-                        sh 'git push origin HEAD:jenkins-jobs'
+                        sh 'git push origin HEAD:jenkins-jobs-dockerhub'
                     }
                 }
             }
