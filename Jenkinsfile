@@ -6,9 +6,9 @@ pipeline {
         maven 'maven-3.9'
     }
     environment {
-        //DOCKER_REPO_SERVER = '330673547330.dkr.ecr.eu-central-1.amazonaws.com'
-        //DOCKER_REPO = "${DOCKER_REPO_SERVER}/java-maven-app"
-        DOCKER_REPO = 'tonyjacob79/java-maven-app'
+        DOCKER_REPO_SERVER = '072060987751.dkr.ecr.us-east-1.amazonaws.com/java-maven-app'
+        DOCKER_REPO = "${DOCKER_REPO_SERVER}/java-maven-app"
+        
         APP_NAME = 'java-maven-app'
     }
     stages {
@@ -40,9 +40,9 @@ pipeline {
                 script {
                     echo "building the docker image..."
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-pat', passwordVariable: 'PASS', usernameVariable: 'USER')]){
-                        sh "docker build -t ${DOCKER_REPO}:${IMAGE_NAME} ."
+                        sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 072060987751.dkr.ecr.us-east-1.amazonaws.com'
                         //sh 'echo $PASS | docker login -u $USER --password-stdin ${DOCKER_REPO_SERVER}'
-                        sh 'echo $PASS | docker login -u $USER --password-stdin'
+                        sh "docker build -t ${DOCKER_REPO}:${IMAGE_NAME} ."                                               
                         sh "docker push ${DOCKER_REPO}:${IMAGE_NAME}"
                     }
                 }
