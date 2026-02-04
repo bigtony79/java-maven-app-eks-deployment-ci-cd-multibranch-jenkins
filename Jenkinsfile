@@ -39,7 +39,7 @@ pipeline {
             steps {
                 script {
                     echo "building the docker image..."
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-pat', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                    withCredentials([usernamePassword(credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]){
                         sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 072060987751.dkr.ecr.us-east-1.amazonaws.com'
                         //sh 'echo $PASS | docker login -u $USER --password-stdin ${DOCKER_REPO_SERVER}'
                         sh "docker build -t ${DOCKER_REPO}:${IMAGE_NAME} ."                                               
